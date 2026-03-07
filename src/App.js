@@ -1,73 +1,78 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-
+import Header from "./components/Header";
 import Home from "./pages/Home";
-import CartPage from "./pages/CartPage";
+import Cart from "./pages/Cart";
+import Orders from "./pages/Orders";
+import Checkout from "./pages/Checkout";
 
 function App() {
 
-  const [products, setProducts] = useState([]);
-  const [cart, setCart] = useState([]);
+  const [page, setPage] = useState("home");
+
+  const [cart, setCart] = useState(
+    JSON.parse(localStorage.getItem("cart")) || []
+  );
+
+  const [orders, setOrders] = useState(
+    JSON.parse(localStorage.getItem("orders")) || []
+  );
 
   useEffect(() => {
+    localStorage.setItem("cart", JSON.stringify(cart));
+  }, [cart]);
 
-    const data = [
-      { id: 1, name: "Laptop", price: 50000 },
-      { id: 2, name: "Phone", price: 20000 },
-      { id: 3, name: "Headphones", price: 3000 },
-      { id: 4, name: "Watch", price: 5000 }
-    ];
-
-    setProducts(data);
-
-  }, []);
+  useEffect(() => {
+    localStorage.setItem("orders", JSON.stringify(orders));
+  }, [orders]);
 
   const addToCart = (product) => {
-    setCart([...cart, product]);
+
+    const exist = cart.find((x) => x.id === product.id);
+
+    if (exist) {
+      setCart(
+        cart.map((x) =>
+          x.id === product.id ? { ...x, qty: x.qty + 1 } : x
+        )
+      );
+    } else {
+      setCart([...cart, { ...product, qty: 1 }]);
+    }
+
+    alert("Product added to cart");
+    setPage("cart");
   };
 
-  const removeFromCart = (index) => {
-    const updated = [...cart];
-    updated.splice(index,1);
-    setCart(updated);
+  const buyNow = (product) => {
+
+    const newOrder = { ...product, id: Date.now(), qty: 1 };
+
+    setOrders([...orders, newOrder]);
+
+    alert("Product added to Orders");
+    setPage("orders");
   };
 
   return (
+    <div>
 
-    <Router>
+      <Header setPage={setPage} cart={cart} />
 
-      <h1>Mini Amazon</h1>
+      {page === "home" && (
+        <Home addToCart={addToCart} buyNow={buyNow} />
+      )}
 
-      <nav>
-        <Link to="/">Home</Link> | 
-        <Link to="/cart">Cart ({cart.length})</Link>
-      </nav>
+      {page === "cart" && (
+        <Cart cart={cart} setCart={setCart} setPage={setPage} />
+      )}
 
-      <Routes>
+      {page === "orders" && (
+        <Orders orders={orders} setOrders={setOrders} />
+      )}
 
-        <Route 
-          path="/" 
-          element={
-            <Home 
-              products={products} 
-              addToCart={addToCart}
-            />
-          } 
-        />
+      {page === "checkout" && <Checkout />}
 
-        <Route 
-          path="/cart" 
-          element={
-            <CartPage 
-              cart={cart} 
-              removeFromCart={removeFromCart}
-            />
-          } 
-        />
-
-      </Routes>
-
-    </Router>
+    </div>
   );
 }
 

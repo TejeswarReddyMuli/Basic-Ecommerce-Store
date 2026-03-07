@@ -1,12 +1,13 @@
 import React from "react";
 
-function ProductCard({ product, addToCart }) {
+function ProductCard({ product, addToCart, buyNow }) {
 
   return (
+    <div className="card">
 
-    <div style={{border:"1px solid gray", padding:"10px", margin:"10px"}}>
+      <img src={product.image} alt="" />
 
-      <h3>{product.name}</h3>
+      <h4>{product.title}</h4>
 
       <p>₹{product.price}</p>
 
@@ -14,8 +15,11 @@ function ProductCard({ product, addToCart }) {
         Add to Cart
       </button>
 
-    </div>
+      <button onClick={() => buyNow(product)}>
+        Buy Now
+      </button>
 
+    </div>
   );
 }
 
